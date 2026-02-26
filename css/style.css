@@ -51,6 +51,8 @@ body {
         0 0 20px rgba(0, 240, 255, 0.5),
         0 0 40px rgba(181, 55, 242, 0.3);
     background: linear-gradient(135deg, #0a0e27 0%, #1a1f3a 100%);
+    touch-action: none;
+    user-select: none;
 }
 
 /* 信息面板 */
@@ -230,10 +232,27 @@ body {
     letter-spacing: 0.05rem;
 }
 
+.controls-hint p {
+    margin: 0.5rem 0;
+}
+
+/* 移动端提示 */
+@media (max-width: 768px) {
+    .controls-hint p:first-child {
+        display: none;
+    }
+
+    .controls-hint::after {
+        content: "在屏幕上滑动控制方向";
+        display: block;
+    }
+}
+
 /* 响应式设计 */
 @media (max-width: 900px) {
     .game-title {
         font-size: 2rem;
+        letter-spacing: 0.3rem;
     }
 
     #gameCanvas {
@@ -242,7 +261,35 @@ body {
     }
 
     .info-panel {
-        flex-direction: column;
+        flex-direction: row;
         gap: 1rem;
+        flex-wrap: wrap;
+    }
+
+    .info-item {
+        flex: 1;
+        min-width: 80px;
+    }
+
+    .menu-btn {
+        width: 160px;
+        font-size: 1rem;
+        padding: 0.8rem 1.5rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .game-title {
+        font-size: 1.5rem;
+        letter-spacing: 0.2rem;
+        margin-bottom: 1rem;
+    }
+
+    .info-value {
+        font-size: 1.4rem;
+    }
+
+    .info-label {
+        font-size: 0.8rem;
     }
 }

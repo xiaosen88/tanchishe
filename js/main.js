@@ -120,3 +120,60 @@ window.addEventListener('keydown', (e) => {
         e.preventDefault();
     }
 });
+
+// 触摸控制（移动端）
+let touchStartX = 0;
+let touchStartY = 0;
+let touchEndX = 0;
+let touchEndY = 0;
+
+const minSwipeDistance = 30; // 最小滑动距离
+
+canvas.addEventListener('touchstart', (e) => {
+    e.preventDefault();
+    touchStartX = e.changedTouches[0].screenX;
+    touchStartY = e.changedTouches[0].screenY;
+}, { passive: false });
+
+canvas.addEventListener('touchend', (e) => {
+    e.preventDefault();
+
+    if (game.getState() !== GAME_STATE.PLAYING) {
+        return;
+    }
+
+    const snake = game.getSnake();
+    if (!snake) return;
+
+    touchEndX = e.changedTouches[0].screenX;
+    touchEndY = e.changedTouches[0].screenY;
+
+    const deltaX = touchEndX - touchStartX;
+    const deltaY = touchEndY - touchStartY;
+
+    // 判断滑动方向
+    if (Math.abs(deltaX) > Math.abs(deltaY)) {
+        // 水平滑动
+        if (Math.abs(deltaX) > minSwipeDistance) {
+            if (deltaX > 0) {
+                snake.changeDirection(DIRECTION.RIGHT);
+            } else {
+                snake.changeDirection(DIRECTION.LEFT);
+            }
+        }
+    } else {
+        // 垂直滑动
+        if (Math.abs(deltaY) > minSwipeDistance) {
+            if (deltaY > 0) {
+                snake.changeDirection(DIRECTION.DOWN);
+            } else {
+                snake.changeDirection(DIRECTION.UP);
+            }
+        }
+    }
+}, { passive: false });
+
+// 防止移动端双击缩放
+canvas.addEventListener('touchmove', (e) => {
+    e.preventDefault();
+}, { passive: false });
