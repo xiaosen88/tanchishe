@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>贪吃蛇 - 赛博朋克</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <div class="container">
+        <!-- 游戏标题 -->
+        <h1 class="game-title">CYBER SNAKE</h1>
+
+        <!-- Canvas 游戏区域 -->
+        <div class="game-wrapper">
+            <canvas id="gameCanvas" width="800" height="600"></canvas>
+
+            <!-- 游戏信息面板 -->
+            <div class="info-panel">
+                <div class="info-item">
+                    <span class="info-label">分数</span>
+                    <span class="info-value" id="score">0</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">等级</span>
+                    <span class="info-value" id="level">1</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">最高分</span>
+                    <span class="info-value" id="highScore">0</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- 开始菜单 -->
+        <div id="startMenu" class="menu-overlay">
+            <div class="menu-content">
+                <h2 class="menu-title">选择难度</h2>
+                <button class="menu-btn" data-difficulty="EASY">简单</button>
+                <button class="menu-btn" data-difficulty="NORMAL">普通</button>
+                <button class="menu-btn" data-difficulty="HARD">困难</button>
+            </div>
+        </div>
+
+        <!-- 暂停界面 -->
+        <div id="pauseMenu" class="menu-overlay" style="display: none;">
+            <div class="menu-content">
+                <h2 class="menu-title">游戏暂停</h2>
+                <p class="menu-hint">按空格继续</p>
+            </div>
+        </div>
+
+        <!-- 游戏结束界面 -->
+        <div id="gameOverMenu" class="menu-overlay" style="display: none;">
+            <div class="menu-content">
+                <h2 class="menu-title game-over-title">GAME OVER</h2>
+                <p class="final-score">得分: <span id="finalScore">0</span></p>
+                <p class="final-high-score">最高分: <span id="finalHighScore">0</span></p>
+                <button class="menu-btn" id="restartBtn">重新开始</button>
+                <button class="menu-btn secondary" id="menuBtn">返回菜单</button>
+            </div>
+        </div>
+
+        <!-- 通知消息 -->
+        <div id="notification" class="notification"></div>
+
+        <!-- 音效控制 -->
+        <button id="muteBtn" class="mute-btn" title="音效开关">
+            <span id="muteIcon">🔊</span>
+        </button>
+
+        <!-- 控制提示 -->
+        <div class="controls-hint">
+            <p>方向键/WASD: 移动 | 空格: 暂停 | R: 重新开始</p>
+        </div>
+    </div>
+
+    <script type="module" src="js/main.js"></script>
+</body>
+</html>
