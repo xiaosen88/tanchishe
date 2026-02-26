@@ -177,3 +177,39 @@ canvas.addEventListener('touchend', (e) => {
 canvas.addEventListener('touchmove', (e) => {
     e.preventDefault();
 }, { passive: false });
+
+// 虚拟按键控制
+const virtualControls = document.getElementById('virtualControls');
+if (virtualControls) {
+    const virtualButtons = virtualControls.querySelectorAll('.virtual-btn');
+
+    virtualButtons.forEach(btn => {
+        btn.addEventListener('touchstart', (e) => {
+            e.preventDefault();
+
+            if (game.getState() !== GAME_STATE.PLAYING) {
+                return;
+            }
+
+            const snake = game.getSnake();
+            if (!snake) return;
+
+            const direction = btn.getAttribute('data-direction');
+
+            switch (direction) {
+                case 'UP':
+                    snake.changeDirection(DIRECTION.UP);
+                    break;
+                case 'DOWN':
+                    snake.changeDirection(DIRECTION.DOWN);
+                    break;
+                case 'LEFT':
+                    snake.changeDirection(DIRECTION.LEFT);
+                    break;
+                case 'RIGHT':
+                    snake.changeDirection(DIRECTION.RIGHT);
+                    break;
+            }
+        }, { passive: false });
+    });
+}

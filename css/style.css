@@ -236,6 +236,59 @@ body {
     margin: 0.5rem 0;
 }
 
+/* 虚拟方向键 */
+.virtual-controls {
+    display: none;
+    position: fixed;
+    bottom: 3rem;
+    right: 2rem;
+    width: 180px;
+    height: 180px;
+}
+
+.virtual-btn {
+    position: absolute;
+    width: 60px;
+    height: 60px;
+    background: rgba(0, 240, 255, 0.2);
+    border: 2px solid #00f0ff;
+    border-radius: 10px;
+    color: #00f0ff;
+    font-size: 1.5rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    box-shadow: 0 0 10px rgba(0, 240, 255, 0.3);
+    backdrop-filter: blur(10px);
+    user-select: none;
+    -webkit-tap-highlight-color: transparent;
+}
+
+.virtual-btn:active {
+    background: rgba(0, 240, 255, 0.5);
+    box-shadow: 0 0 20px rgba(0, 240, 255, 0.6);
+    transform: scale(0.95);
+}
+
+.virtual-up {
+    top: 0;
+    left: 60px;
+}
+
+.virtual-down {
+    bottom: 0;
+    left: 60px;
+}
+
+.virtual-left {
+    top: 60px;
+    left: 0;
+}
+
+.virtual-right {
+    top: 60px;
+    right: 0;
+}
+
 /* 移动端提示 */
 @media (max-width: 768px) {
     .controls-hint p:first-child {
@@ -243,7 +296,11 @@ body {
     }
 
     .controls-hint::after {
-        content: "在屏幕上滑动控制方向";
+        content: "使用虚拟按键或滑动控制方向";
+        display: block;
+    }
+
+    .virtual-controls {
         display: block;
     }
 }
