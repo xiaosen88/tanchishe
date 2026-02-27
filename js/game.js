@@ -62,11 +62,12 @@ export class Game {
 
         if (this.state === GAME_STATE.PLAYING) {
             const currentSpeed = this.getCurrentSpeed();
-            const elapsed = timestamp - this.lastUpdateTime;
+            let elapsed = timestamp - this.lastUpdateTime;
 
             if (elapsed >= currentSpeed) {
                 this.update();
                 this.lastUpdateTime = timestamp;
+                elapsed = timestamp - this.lastUpdateTime;
             }
 
             // 计算插值进度 0~1，用于平滑动画
