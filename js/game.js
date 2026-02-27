@@ -30,6 +30,7 @@ export class Game {
         this.state = GAME_STATE.PLAYING;
         this.lastUpdateTime = 0;
         this.speedBoostEndTime = 0;
+        this.lerpT = 0;
     }
 
     start() {
@@ -59,14 +60,17 @@ export class Game {
         // 更新粒子（每帧）
         this.particleSystem.update();
 
-        // 游戏逻辑更新（根据速度）
         if (this.state === GAME_STATE.PLAYING) {
             const currentSpeed = this.getCurrentSpeed();
+            const elapsed = timestamp - this.lastUpdateTime;
 
-            if (timestamp - this.lastUpdateTime >= currentSpeed) {
+            if (elapsed >= currentSpeed) {
                 this.update();
                 this.lastUpdateTime = timestamp;
             }
+
+            // 计算插值进度 0~1，用于平滑动画
+            this.lerpT = Math.min(elapsed / currentSpeed, 1);
         }
 
         // 渲染（每帧）
@@ -172,7 +176,7 @@ export class Game {
 
         // 绘制蛇
         if (this.snake) {
-            this.snake.render(this.ctx);
+            this.snake.render(this.ctx, this.lerpT || 0);
         }
 
         // 绘制粒子

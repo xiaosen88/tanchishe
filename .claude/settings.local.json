@@ -1,0 +1,9 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(git add .)",
+      "Bash(git commit -m \"Smooth snake: interpolation animation + bezier continuous body\")",
+      "Bash(git push)"
+    ]
+  }
+}
