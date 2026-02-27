@@ -79,9 +79,9 @@ export class Snake {
         // 绘制卡通蛇身
         this._drawCartoonBody(ctx, splinePts, len);
 
-        // 绘制蛇头（手绘）
+        // 绘制蛇头（手绘），朝向用实际移动方向，避免样条抖动
         const headR = GRID_SIZE * 0.6;
-        this._drawHead(ctx, splinePts[0], splinePts[Math.min(3, splinePts.length - 1)], headR);
+        this._drawHead(ctx, splinePts[0], this.direction, headR);
     }
 
     _buildSplinePath(pts) {
@@ -255,11 +255,12 @@ export class Snake {
         ctx.restore();
     }
 
-    _drawHead(ctx, pos, nextPos, r) {
+    _drawHead(ctx, pos, direction, r) {
         ctx.save();
         ctx.translate(pos.x, pos.y);
 
-        const angle = Math.atan2(pos.y - nextPos.y, pos.x - nextPos.x);
+        // 直接用移动方向计算固定角度，不依赖样条点
+        const angle = Math.atan2(direction.y, direction.x);
         ctx.rotate(angle);
 
         // 头部椭圆
