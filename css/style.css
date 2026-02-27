@@ -161,6 +161,32 @@ body {
     margin-top: 1rem;
 }
 
+/* 暂停界面：半透明，提示缩小到顶部 */
+#pauseMenu.menu-overlay {
+    background: rgba(10, 14, 39, 0.25);
+    backdrop-filter: none;
+    align-items: flex-start;
+}
+
+#pauseMenu .menu-content {
+    margin-top: 1.5rem;
+    padding: 0.6rem 1.5rem;
+    background: rgba(10, 14, 39, 0.6);
+    border: 1px solid rgba(0, 240, 255, 0.4);
+    border-radius: 8px;
+}
+
+#pauseMenu .menu-title {
+    font-size: 1.2rem;
+    margin-bottom: 0.3rem;
+    letter-spacing: 0.15rem;
+}
+
+#pauseMenu .menu-hint {
+    font-size: 0.85rem;
+    margin-top: 0.2rem;
+}
+
 /* 最终分数显示 */
 .final-score, .final-high-score {
     font-size: 1.5rem;
