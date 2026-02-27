@@ -14,12 +14,13 @@ export class Snake {
         this.nextDirection = DIRECTION.RIGHT;
         this.growing = false;
         this.tonguePhase = 0;
+
+        // 颜色缓存，避免每帧重复计算
+        this._colorCache = new Map();
     }
 
     move() {
-        // 保存上一帧位置用于插值
         this.prevBody = this.body.map(s => ({ ...s }));
-
         this.direction = this.nextDirection;
         const head = { ...this.body[0] };
         head.x += this.direction.x;
@@ -54,15 +55,21 @@ export class Snake {
     getHead() { return this.body[0]; }
     getBody() { return this.body; }
 
-    // 获取插值后的像素坐标
+    // 带缓动的插值
+    _ease(t) {
+        // smoothstep: 更平滑的过渡
+        return t * t * (3 - 2 * t);
+    }
+
     _interpPos(cur, prev, t) {
+        const et = this._ease(t);
         const cx = cur.x * GRID_SIZE + GRID_SIZE / 2;
         const cy = cur.y * GRID_SIZE + GRID_SIZE / 2;
         const px = prev.x * GRID_SIZE + GRID_SIZE / 2;
         const py = prev.y * GRID_SIZE + GRID_SIZE / 2;
         return {
-            x: px + (cx - px) * t,
-            y: py + (cy - py) * t
+            x: px + (cx - px) * et,
+            y: py + (cy - py) * et
         };
     }
 
@@ -70,7 +77,7 @@ export class Snake {
         this.tonguePhase += 0.08;
         const len = this.body.length;
 
-        // 构建插值后的点列表
+        // 构建插值后的控制点
         const pts = this.body.map((seg, i) => {
             const prev = this.prevBody[i] || seg;
             return this._interpPos(seg, prev, t);
@@ -78,102 +85,165 @@ export class Snake {
 
         if (pts.length < 2) return;
 
-        // 计算每段的宽度（头宽尾细）
-        const headR = GRID_SIZE * 0.52;
-        const tailR = GRID_SIZE * 0.18;
-        const getR = (i) => headR - (headR - tailR) * (i / (len - 1));
+        // 用 Catmull-Rom 样条生成高密度平滑路径点
+        const splinePts = this._buildSplinePath(pts);
 
-        // 绘制蛇身（用贝塞尔曲线连接各点）
-        this._drawSnakeBody(ctx, pts, len, getR);
+        // 沿样条路径绘制平滑渐变蛇身
+        this._drawSmoothBody(ctx, splinePts, len);
 
         // 绘制蛇头
-        this._drawHead(ctx, pts[0], pts[1], headR);
+        const headR = GRID_SIZE * 0.52;
+        this._drawHead(ctx, splinePts[0], splinePts[Math.min(3, splinePts.length - 1)], headR);
     }
 
-    _drawSnakeBody(ctx, pts, len, getR) {
-        if (pts.length < 2) return;
+    // Catmull-Rom 样条插值，生成平滑路径
+    _buildSplinePath(pts) {
+        if (pts.length < 2) return pts;
 
-        // 用 catmull-rom 样条生成平滑路径，然后沿路径绘制变宽的蛇身
-        // 先绘制身体（从尾到颈，不含头）
-        for (let i = len - 1; i >= 1; i--) {
-            const p0 = pts[Math.min(i + 1, len - 1)];
+        const result = [];
+        // 每两个控制点之间插入若干细分点
+        const subdivisions = 8;
+
+        for (let i = 0; i < pts.length - 1; i++) {
+            const p0 = pts[Math.max(i - 1, 0)];
             const p1 = pts[i];
-            const p2 = pts[i - 1];
+            const p2 = pts[i + 1];
+            const p3 = pts[Math.min(i + 2, pts.length - 1)];
 
-            const r1 = getR(i);
-            const r2 = getR(i - 1);
-
-            // 计算该段的方向向量
-            const dx = p2.x - p0.x;
-            const dy = p2.y - p0.y;
-            const len2 = Math.sqrt(dx * dx + dy * dy) || 1;
-            const nx = -dy / len2;
-            const ny = dx / len2;
-
-            // 颜色插值
-            const ratio = i / (len - 1);
-            const color = this._lerpColor('#00e8cc', '#7b2ff7', ratio);
-            const darkColor = this._lerpColor('#009e8e', '#4a1a99', ratio);
-
-            ctx.shadowBlur = 6;
-            ctx.shadowColor = color;
-
-            // 绘制该节圆形
-            const grad = ctx.createRadialGradient(
-                p1.x - r1 * 0.3, p1.y - r1 * 0.3, r1 * 0.05,
-                p1.x, p1.y, r1
-            );
-            grad.addColorStop(0, this._lighten(color, 50));
-            grad.addColorStop(0.5, color);
-            grad.addColorStop(1, darkColor);
-
-            ctx.beginPath();
-            ctx.arc(p1.x, p1.y, r1 * 0.92, 0, Math.PI * 2);
-            ctx.fillStyle = grad;
-            ctx.fill();
-
-            // 连接相邻节之间的填充（消除缝隙）
-            if (i < len - 1) {
-                const pp = pts[i + 1];
-                const rp = getR(i + 1);
-                this._fillGap(ctx, pp, p1, rp * 0.9, r1 * 0.9, color, darkColor);
-            }
-
-            ctx.shadowBlur = 0;
-
-            // 鳞片纹路
-            if (i % 3 === 0 && r1 > 5) {
-                ctx.save();
-                ctx.strokeStyle = 'rgba(255,255,255,0.12)';
-                ctx.lineWidth = 1;
-                ctx.beginPath();
-                ctx.arc(p1.x, p1.y, r1 * 0.5, 0.4, Math.PI - 0.4);
-                ctx.stroke();
-                ctx.restore();
+            for (let j = 0; j < subdivisions; j++) {
+                const t = j / subdivisions;
+                result.push(this._catmullRom(p0, p1, p2, p3, t));
             }
         }
+        // 加入最后一个点
+        result.push(pts[pts.length - 1]);
+        return result;
     }
 
-    // 填充两节之间的间隙
-    _fillGap(ctx, p1, p2, r1, r2, color, darkColor) {
-        const dx = p2.x - p1.x;
-        const dy = p2.y - p1.y;
-        const dist = Math.sqrt(dx * dx + dy * dy) || 1;
-        const nx = -dy / dist;
-        const ny = dx / dist;
+    _catmullRom(p0, p1, p2, p3, t) {
+        const t2 = t * t;
+        const t3 = t2 * t;
+        return {
+            x: 0.5 * ((2 * p1.x) +
+                (-p0.x + p2.x) * t +
+                (2 * p0.x - 5 * p1.x + 4 * p2.x - p3.x) * t2 +
+                (-p0.x + 3 * p1.x - 3 * p2.x + p3.x) * t3),
+            y: 0.5 * ((2 * p1.y) +
+                (-p0.y + p2.y) * t +
+                (2 * p0.y - 5 * p1.y + 4 * p2.y - p3.y) * t2 +
+                (-p0.y + 3 * p1.y - 3 * p2.y + p3.y) * t3)
+        };
+    }
 
+    _drawSmoothBody(ctx, splinePts, segCount) {
+        const totalPts = splinePts.length;
+        if (totalPts < 2) return;
+
+        // 宽度参数
+        const headR = GRID_SIZE * 0.50;
+        const tailR = GRID_SIZE * 0.12;
+
+        // 计算每个样条点的法线和宽度，构建左右轮廓
+        const leftContour = [];
+        const rightContour = [];
+
+        for (let i = 0; i < totalPts; i++) {
+            const ratio = i / (totalPts - 1);
+            // 宽度从头到尾平滑过渡
+            const r = headR - (headR - tailR) * ratio;
+
+            // 计算切线方向
+            let tx, ty;
+            if (i === 0) {
+                tx = splinePts[1].x - splinePts[0].x;
+                ty = splinePts[1].y - splinePts[0].y;
+            } else if (i === totalPts - 1) {
+                tx = splinePts[i].x - splinePts[i - 1].x;
+                ty = splinePts[i].y - splinePts[i - 1].y;
+            } else {
+                tx = splinePts[i + 1].x - splinePts[i - 1].x;
+                ty = splinePts[i + 1].y - splinePts[i - 1].y;
+            }
+
+            const tLen = Math.sqrt(tx * tx + ty * ty) || 1;
+            // 法线（垂直于切线）
+            const nx = -ty / tLen;
+            const ny = tx / tLen;
+
+            leftContour.push({
+                x: splinePts[i].x + nx * r,
+                y: splinePts[i].y + ny * r
+            });
+            rightContour.push({
+                x: splinePts[i].x - nx * r,
+                y: splinePts[i].y - ny * r
+            });
+        }
+
+        // 绘制蛇身填充（一个连续的闭合路径）
+        ctx.save();
+
+        // 创建沿蛇身方向的渐变
+        const grad = ctx.createLinearGradient(
+            splinePts[0].x, splinePts[0].y,
+            splinePts[totalPts - 1].x, splinePts[totalPts - 1].y
+        );
+        grad.addColorStop(0, '#00e8cc');
+        grad.addColorStop(0.5, '#5c4de8');
+        grad.addColorStop(1, '#7b2ff7');
+
+        // 发光效果
+        ctx.shadowBlur = 10;
+        ctx.shadowColor = '#00f0ff';
+
+        // 构建闭合路径：左轮廓正向 + 右轮廓反向
         ctx.beginPath();
-        ctx.moveTo(p1.x + nx * r1, p1.y + ny * r1);
-        ctx.lineTo(p2.x + nx * r2, p2.y + ny * r2);
-        ctx.lineTo(p2.x - nx * r2, p2.y - ny * r2);
-        ctx.lineTo(p1.x - nx * r1, p1.y - ny * r1);
+        ctx.moveTo(leftContour[0].x, leftContour[0].y);
+        for (let i = 1; i < leftContour.length; i++) {
+            ctx.lineTo(leftContour[i].x, leftContour[i].y);
+        }
+        // 尾部圆弧
+        const tailPt = splinePts[totalPts - 1];
+        const tailLeft = leftContour[totalPts - 1];
+        const tailAngle = Math.atan2(tailLeft.y - tailPt.y, tailLeft.x - tailPt.x);
+        ctx.arc(tailPt.x, tailPt.y, tailR, tailAngle, tailAngle + Math.PI);
+        // 右轮廓反向
+        for (let i = rightContour.length - 1; i >= 0; i--) {
+            ctx.lineTo(rightContour[i].x, rightContour[i].y);
+        }
         ctx.closePath();
-
-        const grad = ctx.createLinearGradient(p1.x, p1.y, p2.x, p2.y);
-        grad.addColorStop(0, color);
-        grad.addColorStop(1, color);
         ctx.fillStyle = grad;
         ctx.fill();
+
+        ctx.shadowBlur = 0;
+
+        // 高光条纹（沿中心线偏上）
+        ctx.beginPath();
+        ctx.strokeStyle = 'rgba(255,255,255,0.08)';
+        ctx.lineWidth = headR * 0.5;
+        ctx.lineCap = 'round';
+        ctx.lineJoin = 'round';
+        ctx.moveTo(splinePts[0].x, splinePts[0].y);
+        for (let i = 1; i < totalPts; i++) {
+            ctx.lineTo(splinePts[i].x, splinePts[i].y);
+        }
+        ctx.stroke();
+
+        // 鳞片纹路（沿路径每隔一段画弧线）
+        const scaleInterval = Math.floor(totalPts / segCount) * 3;
+        ctx.strokeStyle = 'rgba(255,255,255,0.1)';
+        ctx.lineWidth = 1;
+        for (let i = scaleInterval; i < totalPts - scaleInterval; i += scaleInterval) {
+            const ratio = i / (totalPts - 1);
+            const r = (headR - (headR - tailR) * ratio) * 0.5;
+            if (r > 3) {
+                ctx.beginPath();
+                ctx.arc(splinePts[i].x, splinePts[i].y, r, 0.4, Math.PI - 0.4);
+                ctx.stroke();
+            }
+        }
+
+        ctx.restore();
     }
 
     _drawHead(ctx, pos, nextPos, r) {
@@ -218,19 +288,16 @@ export class Snake {
     _drawEye(ctx, ex, ey, r) {
         const er = r * 0.22;
 
-        // 眼白
         ctx.fillStyle = '#ffffff';
         ctx.beginPath();
         ctx.arc(ex, ey, er, 0, Math.PI * 2);
         ctx.fill();
 
-        // 瞳孔
         ctx.fillStyle = '#110022';
         ctx.beginPath();
         ctx.arc(ex + er * 0.18, ey, er * 0.58, 0, Math.PI * 2);
         ctx.fill();
 
-        // 高光
         ctx.fillStyle = 'rgba(255,255,255,0.95)';
         ctx.beginPath();
         ctx.arc(ex + er * 0.05, ey - er * 0.32, er * 0.26, 0, Math.PI * 2);
@@ -268,18 +335,5 @@ export class Snake {
         ctx.stroke();
 
         ctx.shadowBlur = 0;
-    }
-
-    _lerpColor(a, b, t) {
-        const ah = a.replace('#', '');
-        const bh = b.replace('#', '');
-        const ar = parseInt(ah.slice(0,2),16), ag = parseInt(ah.slice(2,4),16), ab = parseInt(ah.slice(4,6),16);
-        const br = parseInt(bh.slice(0,2),16), bg = parseInt(bh.slice(2,4),16), bb = parseInt(bh.slice(4,6),16);
-        return `rgb(${Math.round(ar+(br-ar)*t)},${Math.round(ag+(bg-ag)*t)},${Math.round(ab+(bb-ab)*t)})`;
-    }
-
-    _lighten(color, amt) {
-        const m = color.match(/\d+/g).map(Number);
-        return `rgb(${Math.min(255,m[0]+amt)},${Math.min(255,m[1]+amt)},${Math.min(255,m[2]+amt)})`;
     }
 }
