@@ -60,8 +60,8 @@ export class Snake {
         return t * t * (3 - 2 * t);
     }
 
-    _interpPos(cur, prev, t) {
-        const et = this._ease(t);
+    _interpPos(cur, prev, t, useEase = true) {
+        const et = useEase ? this._ease(t) : t;
         const cx = cur.x * GRID_SIZE + GRID_SIZE / 2;
         const cy = cur.y * GRID_SIZE + GRID_SIZE / 2;
         const px = prev.x * GRID_SIZE + GRID_SIZE / 2;
@@ -78,7 +78,8 @@ export class Snake {
 
         const pts = this.body.map((seg, i) => {
             const prev = this.prevBody[i] || seg;
-            return this._interpPos(seg, prev, t);
+            // 蛇头用线性插值（匀速），身体用缓动
+            return this._interpPos(seg, prev, t, i > 0);
         });
 
         if (pts.length < 2) return;
