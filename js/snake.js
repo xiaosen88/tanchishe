@@ -56,19 +56,14 @@ export class Snake {
     getHead() { return this.body[0]; }
     getBody() { return this.body; }
 
-    _ease(t) {
-        return t * t * (3 - 2 * t);
-    }
-
-    _interpPos(cur, prev, t, useEase = true) {
-        const et = useEase ? this._ease(t) : t;
+    _interpPos(cur, prev, t) {
         const cx = cur.x * GRID_SIZE + GRID_SIZE / 2;
         const cy = cur.y * GRID_SIZE + GRID_SIZE / 2;
         const px = prev.x * GRID_SIZE + GRID_SIZE / 2;
         const py = prev.y * GRID_SIZE + GRID_SIZE / 2;
         return {
-            x: px + (cx - px) * et,
-            y: py + (cy - py) * et
+            x: px + (cx - px) * t,
+            y: py + (cy - py) * t
         };
     }
 
@@ -78,8 +73,7 @@ export class Snake {
 
         const pts = this.body.map((seg, i) => {
             const prev = this.prevBody[i] || seg;
-            // 蛇头用线性插值（匀速），身体用缓动
-            return this._interpPos(seg, prev, t, i > 0);
+            return this._interpPos(seg, prev, t);
         });
 
         if (pts.length < 2) return;
