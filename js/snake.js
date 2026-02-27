@@ -76,10 +76,10 @@ export class Snake {
 
         const splinePts = this._buildSplinePath(pts);
 
-        // 绘制卡通蛇身
+        // Draw body.
         this._drawCartoonBody(ctx, splinePts, len);
 
-        // 绘制蛇头（手绘），朝向用实际移动方向，避免样条抖动
+        // Draw head.
         const headR = GRID_SIZE * 0.6;
         this._drawHead(ctx, splinePts[0], this.direction, headR);
     }
@@ -119,7 +119,7 @@ export class Snake {
         };
     }
 
-    // 卡通风格蛇身：圆润、有光泽、带腹部条纹
+    // Cartoon body with bright green palette and zigzag pattern.
     _drawCartoonBody(ctx, splinePts, segCount) {
         const totalPts = splinePts.length;
         if (totalPts < 2) return;
@@ -127,7 +127,6 @@ export class Snake {
         const headR = GRID_SIZE * 0.48;
         const tailR = GRID_SIZE * 0.10;
 
-        // 构建左右轮廓
         const leftContour = [];
         const rightContour = [];
 
@@ -163,22 +162,19 @@ export class Snake {
 
         ctx.save();
 
-        // --- 主体填充：鲜亮的绿色卡通渐变 ---
         const grad = ctx.createLinearGradient(
             splinePts[0].x, splinePts[0].y,
             splinePts[totalPts - 1].x, splinePts[totalPts - 1].y
         );
-        grad.addColorStop(0, '#4ade80');   // 亮绿
-        grad.addColorStop(0.5, '#22c55e'); // 中绿
-        grad.addColorStop(1, '#16a34a');   // 深绿
+        grad.addColorStop(0, '#24c526');
+        grad.addColorStop(0.55, '#17a61d');
+        grad.addColorStop(1, '#11931a');
 
-        // 描边（卡通轮廓线）
-        ctx.lineWidth = 3;
-        ctx.strokeStyle = '#166534';
+        ctx.lineWidth = 2.8;
+        ctx.strokeStyle = '#0a6a12';
         ctx.lineJoin = 'round';
         ctx.lineCap = 'round';
 
-        // 构建闭合路径
         ctx.beginPath();
         ctx.moveTo(leftContour[0].x, leftContour[0].y);
         for (let i = 1; i < leftContour.length; i++) {
@@ -196,28 +192,14 @@ export class Snake {
         ctx.fill();
         ctx.stroke();
 
-        // --- 腹部浅色条纹（沿中心线偏下） ---
         ctx.beginPath();
-        ctx.strokeStyle = 'rgba(187, 247, 208, 0.45)';
-        ctx.lineWidth = headR * 0.55;
+        ctx.strokeStyle = 'rgba(209, 255, 185, 0.35)';
+        ctx.lineWidth = headR * 0.18;
         ctx.lineCap = 'round';
         ctx.lineJoin = 'round';
-        ctx.moveTo(splinePts[0].x, splinePts[0].y);
-        for (let i = 1; i < totalPts; i++) {
-            ctx.lineTo(splinePts[i].x, splinePts[i].y);
-        }
-        ctx.stroke();
-
-        // --- 高光条纹（沿中心线偏上，模拟光泽） ---
-        ctx.beginPath();
-        ctx.strokeStyle = 'rgba(255, 255, 255, 0.18)';
-        ctx.lineWidth = headR * 0.22;
-        ctx.lineCap = 'round';
-        ctx.lineJoin = 'round';
-        // 偏移高光位置
         for (let i = 0; i < totalPts; i++) {
             const ratio = i / (totalPts - 1);
-            const r = (headR - (headR - tailR) * ratio) * 0.3;
+            const r = (headR - (headR - tailR) * ratio) * 0.28;
             let tx, ty;
             if (i === 0) {
                 tx = splinePts[1].x - splinePts[0].x;
@@ -239,77 +221,120 @@ export class Snake {
         }
         ctx.stroke();
 
-        // --- 卡通斑纹（深色圆点） ---
-        const spotInterval = Math.floor(totalPts / segCount) * 2;
-        for (let i = spotInterval; i < totalPts - spotInterval; i += spotInterval) {
-            const ratio = i / (totalPts - 1);
-            const r = (headR - (headR - tailR) * ratio) * 0.28;
-            if (r > 2) {
-                ctx.beginPath();
-                ctx.arc(splinePts[i].x, splinePts[i].y, r, 0, Math.PI * 2);
-                ctx.fillStyle = 'rgba(21, 128, 61, 0.4)';
-                ctx.fill();
-            }
-        }
+        this._drawZigzagPattern(ctx, splinePts, headR, tailR, segCount);
 
         ctx.restore();
+    }
+
+    _drawZigzagPattern(ctx, splinePts, headR, tailR, segCount) {
+        const totalPts = splinePts.length;
+        if (totalPts < 6) return;
+
+        const step = Math.max(4, Math.floor(totalPts / Math.max(segCount * 2, 10)));
+
+        ctx.beginPath();
+        for (let i = step, n = 0; i < totalPts - step; i += step, n++) {
+            const ratio = i / (totalPts - 1);
+            const r = headR - (headR - tailR) * ratio;
+
+            const prev = splinePts[i - 1];
+            const next = splinePts[i + 1];
+            const tx = next.x - prev.x;
+            const ty = next.y - prev.y;
+            const tLen = Math.sqrt(tx * tx + ty * ty) || 1;
+            const nx = -ty / tLen;
+            const ny = tx / tLen;
+            const side = n % 2 === 0 ? 1 : -1;
+            const offset = r * 0.45 * side;
+            const px = splinePts[i].x + nx * offset;
+            const py = splinePts[i].y + ny * offset;
+
+            if (n === 0) ctx.moveTo(px, py);
+            else ctx.lineTo(px, py);
+        }
+        ctx.strokeStyle = '#b7d23f';
+        ctx.lineWidth = Math.max(2, headR * 0.42);
+        ctx.lineJoin = 'miter';
+        ctx.lineCap = 'round';
+        ctx.stroke();
+
+        ctx.strokeStyle = 'rgba(31, 122, 19, 0.7)';
+        ctx.lineWidth = Math.max(1.4, headR * 0.12);
+        ctx.stroke();
     }
 
     _drawHead(ctx, pos, direction, r) {
         ctx.save();
         ctx.translate(pos.x, pos.y);
 
-        // 直接用移动方向计算固定角度，不依赖样条点
         const angle = Math.atan2(direction.y, direction.x);
         ctx.rotate(angle);
 
-        // 头部椭圆
-        const headGrad = ctx.createRadialGradient(-r * 0.25, -r * 0.25, r * 0.05, 0, 0, r * 1.1);
-        headGrad.addColorStop(0, '#86efac');
-        headGrad.addColorStop(0.45, '#4ade80');
-        headGrad.addColorStop(1, '#166534');
+        const headGrad = ctx.createRadialGradient(-r * 0.45, -r * 0.25, r * 0.02, 0, 0, r * 1.12);
+        headGrad.addColorStop(0, '#57df49');
+        headGrad.addColorStop(0.6, '#24bc2b');
+        headGrad.addColorStop(1, '#10881c');
         ctx.fillStyle = headGrad;
-        ctx.strokeStyle = '#166534';
-        ctx.lineWidth = 2.5;
+        ctx.strokeStyle = '#0c6a13';
+        ctx.lineWidth = 2.2;
         ctx.beginPath();
-        ctx.ellipse(r * 0.08, 0, r * 1.1, r * 0.92, 0, 0, Math.PI * 2);
+        ctx.ellipse(r * 0.06, 0, r * 1.02, r * 0.9, 0, 0, Math.PI * 2);
         ctx.fill();
         ctx.stroke();
 
-        // 鼻尖
-        ctx.fillStyle = '#15803d';
+        ctx.fillStyle = '#1eaa27';
         ctx.beginPath();
-        ctx.ellipse(r * 0.95, 0, r * 0.28, r * 0.22, 0, 0, Math.PI * 2);
+        ctx.ellipse(r * 0.82, 0, r * 0.32, r * 0.25, 0, 0, Math.PI * 2);
         ctx.fill();
 
-        // 眼睛
-        this._drawEye(ctx, r * 0.18, -r * 0.42, r);
-        this._drawEye(ctx, r * 0.18,  r * 0.42, r);
+        this._drawEye(ctx, r * 0.02, -r * 0.42, r);
+        this._drawEye(ctx, r * 0.02, r * 0.42, r);
 
-        // 舌头
+        ctx.strokeStyle = '#0d6f15';
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.moveTo(-r * 0.52, -r * 0.56);
+        ctx.lineTo(-r * 0.16, -r * 0.78);
+        ctx.lineTo(r * 0.18, -r * 0.56);
+        ctx.stroke();
+        ctx.beginPath();
+        ctx.moveTo(-r * 0.52, r * 0.56);
+        ctx.lineTo(-r * 0.16, r * 0.78);
+        ctx.lineTo(r * 0.18, r * 0.56);
+        ctx.stroke();
+
+        ctx.fillStyle = '#12851a';
+        ctx.beginPath();
+        ctx.arc(r * 0.58, -r * 0.14, r * 0.1, 0, Math.PI * 2);
+        ctx.arc(r * 0.58, r * 0.14, r * 0.1, 0, Math.PI * 2);
+        ctx.fill();
+
         this._drawTongue(ctx, r);
 
         ctx.restore();
     }
 
     _drawEye(ctx, ex, ey, r) {
-        const er = r * 0.22;
+        const er = r * 0.3;
         ctx.fillStyle = '#ffffff';
         ctx.beginPath();
-        ctx.arc(ex, ey, er, 0, Math.PI * 2);
+        ctx.ellipse(ex, ey, er * 0.95, er * 0.75, 0, 0, Math.PI * 2);
         ctx.fill();
 
-        ctx.fillStyle = '#110022';
+        ctx.strokeStyle = '#0f5b15';
+        ctx.lineWidth = 1.4;
+        ctx.stroke();
+
+        ctx.fillStyle = '#111111';
         ctx.beginPath();
-        ctx.arc(ex + er * 0.18, ey, er * 0.58, 0, Math.PI * 2);
+        ctx.arc(ex + er * 0.15, ey, er * 0.48, 0, Math.PI * 2);
         ctx.fill();
 
-        ctx.fillStyle = 'rgba(255,255,255,0.95)';
+        ctx.fillStyle = 'rgba(255,255,255,0.9)';
         ctx.beginPath();
-        ctx.arc(ex + er * 0.05, ey - er * 0.32, er * 0.26, 0, Math.PI * 2);
+        ctx.arc(ex + er * 0.05, ey - er * 0.24, er * 0.22, 0, Math.PI * 2);
         ctx.fill();
     }
-
     _drawTongue(ctx, r) {
         const out = 0.5 + Math.sin(this.tonguePhase) * 0.5;
         const tLen = r * 0.65 * out;
