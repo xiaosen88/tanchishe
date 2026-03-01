@@ -3,7 +3,11 @@
     "allow": [
       "Bash(git add .)",
       "Bash(git commit -m \"Smooth snake: interpolation animation + bezier continuous body\")",
-      "Bash(git push)"
+      "Bash(git push)",
+      "Bash(git add js/snake.js)",
+      "Bash(git commit:*)",
+      "Bash(git push origin main)",
+      "Bash(git add css/style.css)"
     ]
   }
 }

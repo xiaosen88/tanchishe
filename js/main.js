@@ -5,6 +5,7 @@ import { Score } from './score.js';
 import { ParticleSystem } from './particle.js';
 import { AudioManager } from './audio.js';
 import { UI } from './ui.js';
+import { Leaderboard } from './leaderboard.js';
 
 // 初始化
 const canvas = document.getElementById('gameCanvas');
@@ -16,6 +17,7 @@ const score = new Score();
 const particleSystem = new ParticleSystem();
 const audioManager = new AudioManager();
 const ui = new UI();
+const leaderboard = new Leaderboard();
 
 // 创建游戏实例
 const game = new Game(ctx, food, score, particleSystem, audioManager, ui);
@@ -33,6 +35,30 @@ ui.bindStartButtons((difficulty) => {
     ui.hideStartScreen();
     game.reset(difficulty);
     ui.updateScoreDisplay(0, 1);
+    // 开始播放背景音乐
+    audioManager.playBGM();
+});
+
+// 绑定排行榜按钮
+ui.bindLeaderboardButton(() => {
+    const leaderboardData = leaderboard.getLeaderboard();
+    ui.showLeaderboard(leaderboardData);
+});
+
+// 绑定统计按钮
+ui.bindStatsButton(() => {
+    const statsData = leaderboard.getStats();
+    ui.showStats(statsData);
+});
+
+// 绑定关闭排行榜按钮
+ui.bindCloseLeaderboardButton(() => {
+    ui.hideLeaderboard();
+});
+
+// 绑定关闭统计按钮
+ui.bindCloseStatsButton(() => {
+    ui.hideStats();
 });
 
 // 绑定重新开始按钮
@@ -54,6 +80,14 @@ ui.bindMuteButton(() => {
     const muted = audioManager.toggleMute();
     ui.updateMuteButton(muted);
 });
+
+// 修改游戏结束处理，添加到排行榜
+const originalGameOver = game.gameOver.bind(game);
+game.gameOver = function() {
+    originalGameOver();
+    // 添加到排行榜
+    leaderboard.addScore(score.getScore(), currentDifficulty, score.getLevel());
+};
 
 // 键盘控制
 document.addEventListener('keydown', (e) => {

@@ -43,18 +43,18 @@ export const DIFFICULTY = {
     }
 };
 
-// 赛博朋克配色
+// 简约配色
 export const COLORS = {
-    background: ['#0a0e27', '#1a1f3a'],
-    snakeGradient: ['#00f0ff', '#b537f2'],
-    food: '#ff006e',
+    background: ['#ffffff', '#ffffff'],
+    snakeGradient: ['#3498db', '#2980b9'],
+    food: '#e74c3c',
     specialFood: {
-        speed: '#00f0ff',
-        double: '#ffd700'
+        speed: '#3498db',
+        double: '#f39c12'
     },
-    grid: 'rgba(0, 240, 255, 0.1)',
-    text: '#ffffff',
-    glow: '#00f0ff'
+    grid: 'rgba(0, 0, 0, 0.05)',
+    text: '#2c3e50',
+    glow: '#3498db'
 };
 
 // 食物类型

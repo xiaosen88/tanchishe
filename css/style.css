@@ -5,9 +5,9 @@
 }
 
 body {
-    font-family: 'Courier New', monospace;
-    background: linear-gradient(135deg, #0a0e27 0%, #1a1f3a 100%);
-    color: #ffffff;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Helvetica', 'Arial', sans-serif;
+    background: #f5f5f5;
+    color: #333;
     min-height: 100vh;
     display: flex;
     justify-content: center;
@@ -22,37 +22,29 @@ body {
 
 /* 游戏标题 */
 .game-title {
-    font-size: 3rem;
-    font-weight: bold;
-    letter-spacing: 0.5rem;
-    margin-bottom: 2rem;
-    text-shadow:
-        0 0 10px #00f0ff,
-        0 0 20px #00f0ff,
-        0 0 30px #00f0ff,
-        0 0 40px #b537f2;
-    animation: pulse 2s ease-in-out infinite;
-}
-
-@keyframes pulse {
-    0%, 100% { opacity: 1; }
-    50% { opacity: 0.8; }
+    font-size: 2.5rem;
+    font-weight: 300;
+    letter-spacing: 0.2rem;
+    margin-bottom: 1.5rem;
+    color: #2c3e50;
 }
 
 /* 游戏区域 */
 .game-wrapper {
     position: relative;
     display: inline-block;
+    background: #fff;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
 }
 
 #gameCanvas {
-    border: 2px solid #00f0ff;
-    box-shadow:
-        0 0 20px rgba(0, 240, 255, 0.5),
-        0 0 40px rgba(181, 55, 242, 0.3);
-    background: linear-gradient(135deg, #0a0e27 0%, #1a1f3a 100%);
+    border: 2px solid #e0e0e0;
+    background: #ffffff;
     touch-action: none;
     user-select: none;
+    border-radius: 4px;
 }
 
 /* 信息面板 */
@@ -70,17 +62,17 @@ body {
 }
 
 .info-label {
-    font-size: 0.9rem;
-    color: #00f0ff;
+    font-size: 0.85rem;
+    color: #7f8c8d;
     text-transform: uppercase;
-    letter-spacing: 0.1rem;
+    letter-spacing: 0.05rem;
+    font-weight: 500;
 }
 
 .info-value {
     font-size: 1.8rem;
-    font-weight: bold;
-    color: #ffffff;
-    text-shadow: 0 0 10px #00f0ff;
+    font-weight: 600;
+    color: #2c3e50;
 }
 
 /* 菜单覆盖层 */
@@ -90,12 +82,12 @@ body {
     left: 0;
     width: 100%;
     height: 100%;
-    background: rgba(10, 14, 39, 0.95);
-    backdrop-filter: blur(10px);
+    background: rgba(255, 255, 255, 0.95);
     display: flex;
     justify-content: center;
     align-items: center;
     z-index: 10;
+    border-radius: 8px;
 }
 
 .menu-content {
@@ -104,15 +96,16 @@ body {
 }
 
 .menu-title {
-    font-size: 2.5rem;
+    font-size: 2rem;
     margin-bottom: 2rem;
-    text-shadow: 0 0 20px #00f0ff;
-    letter-spacing: 0.3rem;
+    letter-spacing: 0.1rem;
+    color: #2c3e50;
+    font-weight: 300;
 }
 
 .game-over-title {
-    color: #ff006e;
-    text-shadow: 0 0 20px #ff006e;
+    color: #e74c3c;
+    font-weight: 400;
 }
 
 /* 按钮样式 */
@@ -120,66 +113,59 @@ body {
     display: block;
     width: 200px;
     margin: 1rem auto;
-    padding: 1rem 2rem;
-    font-size: 1.2rem;
-    font-family: 'Courier New', monospace;
-    font-weight: bold;
+    padding: 0.8rem 2rem;
+    font-size: 1rem;
+    font-family: inherit;
+    font-weight: 500;
     color: #ffffff;
-    background: transparent;
-    border: 2px solid #00f0ff;
+    background: #3498db;
+    border: none;
     cursor: pointer;
     text-transform: uppercase;
-    letter-spacing: 0.2rem;
+    letter-spacing: 0.1rem;
     transition: all 0.3s ease;
-    box-shadow: 0 0 10px rgba(0, 240, 255, 0.3);
+    border-radius: 4px;
 }
 
 .menu-btn:hover {
-    background: #00f0ff;
-    color: #0a0e27;
-    box-shadow:
-        0 0 20px #00f0ff,
-        0 0 40px #00f0ff;
+    background: #2980b9;
     transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
 }
 
 .menu-btn.secondary {
-    border-color: #b537f2;
-    box-shadow: 0 0 10px rgba(181, 55, 242, 0.3);
+    background: #95a5a6;
 }
 
 .menu-btn.secondary:hover {
-    background: #b537f2;
-    box-shadow:
-        0 0 20px #b537f2,
-        0 0 40px #b537f2;
+    background: #7f8c8d;
 }
 
 .menu-hint {
-    font-size: 1.2rem;
-    color: #00f0ff;
+    font-size: 1rem;
+    color: #7f8c8d;
     margin-top: 1rem;
 }
 
 /* 暂停界面：半透明，提示缩小到顶部 */
 #pauseMenu.menu-overlay {
-    background: rgba(10, 14, 39, 0.25);
-    backdrop-filter: none;
+    background: rgba(255, 255, 255, 0.9);
     align-items: flex-start;
 }
 
 #pauseMenu .menu-content {
     margin-top: 1.5rem;
     padding: 0.6rem 1.5rem;
-    background: rgba(10, 14, 39, 0.6);
-    border: 1px solid rgba(0, 240, 255, 0.4);
+    background: rgba(255, 255, 255, 0.95);
+    border: 1px solid #e0e0e0;
     border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
 #pauseMenu .menu-title {
     font-size: 1.2rem;
     margin-bottom: 0.3rem;
-    letter-spacing: 0.15rem;
+    letter-spacing: 0.1rem;
 }
 
 #pauseMenu .menu-hint {
@@ -189,15 +175,14 @@ body {
 
 /* 最终分数显示 */
 .final-score, .final-high-score {
-    font-size: 1.5rem;
+    font-size: 1.3rem;
     margin: 1rem 0;
-    color: #ffffff;
+    color: #2c3e50;
 }
 
 .final-score span, .final-high-score span {
-    color: #00f0ff;
-    font-weight: bold;
-    text-shadow: 0 0 10px #00f0ff;
+    color: #3498db;
+    font-weight: 600;
 }
 
 /* 通知消息 */
@@ -206,12 +191,9 @@ body {
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
-    font-size: 3rem;
-    font-weight: bold;
-    color: #ffd700;
-    text-shadow:
-        0 0 20px #ffd700,
-        0 0 40px #ffd700;
+    font-size: 2.5rem;
+    font-weight: 600;
+    color: #27ae60;
     pointer-events: none;
     opacity: 0;
     transition: opacity 0.3s ease;
@@ -236,26 +218,26 @@ body {
     width: 50px;
     height: 50px;
     font-size: 1.5rem;
-    background: rgba(0, 240, 255, 0.2);
-    border: 2px solid #00f0ff;
+    background: #ffffff;
+    border: 2px solid #e0e0e0;
     border-radius: 50%;
     cursor: pointer;
     transition: all 0.3s ease;
-    box-shadow: 0 0 10px rgba(0, 240, 255, 0.3);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
 .mute-btn:hover {
-    background: rgba(0, 240, 255, 0.4);
-    box-shadow: 0 0 20px rgba(0, 240, 255, 0.6);
-    transform: scale(1.1);
+    background: #f8f9fa;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    transform: scale(1.05);
 }
 
 /* 控制提示 */
 .controls-hint {
-    margin-top: 2rem;
-    font-size: 0.9rem;
-    color: rgba(255, 255, 255, 0.6);
-    letter-spacing: 0.05rem;
+    margin-top: 1.5rem;
+    font-size: 0.85rem;
+    color: #7f8c8d;
+    letter-spacing: 0.02rem;
 }
 
 .controls-hint p {
@@ -276,22 +258,21 @@ body {
     position: absolute;
     width: 60px;
     height: 60px;
-    background: rgba(0, 240, 255, 0.2);
-    border: 2px solid #00f0ff;
-    border-radius: 10px;
-    color: #00f0ff;
+    background: #ffffff;
+    border: 2px solid #e0e0e0;
+    border-radius: 8px;
+    color: #2c3e50;
     font-size: 1.5rem;
     cursor: pointer;
     transition: all 0.2s ease;
-    box-shadow: 0 0 10px rgba(0, 240, 255, 0.3);
-    backdrop-filter: blur(10px);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
     user-select: none;
     -webkit-tap-highlight-color: transparent;
 }
 
 .virtual-btn:active {
-    background: rgba(0, 240, 255, 0.5);
-    box-shadow: 0 0 20px rgba(0, 240, 255, 0.6);
+    background: #f8f9fa;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
     transform: scale(0.95);
 }
 
@@ -313,6 +294,107 @@ body {
 .virtual-right {
     top: 60px;
     right: 0;
+}
+
+/* 排行榜样式 */
+.leaderboard-list {
+    max-height: 400px;
+    overflow-y: auto;
+    margin: 1.5rem 0;
+    text-align: left;
+}
+
+.leaderboard-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.8rem 1rem;
+    margin: 0.5rem 0;
+    background: #f8f9fa;
+    border-radius: 4px;
+    border-left: 4px solid #3498db;
+}
+
+.leaderboard-item.top1 {
+    border-left-color: #f39c12;
+    background: #fff9e6;
+}
+
+.leaderboard-item.top2 {
+    border-left-color: #95a5a6;
+    background: #f5f5f5;
+}
+
+.leaderboard-item.top3 {
+    border-left-color: #e67e22;
+    background: #fff3e6;
+}
+
+.leaderboard-rank {
+    font-weight: 600;
+    font-size: 1.2rem;
+    color: #7f8c8d;
+    min-width: 40px;
+}
+
+.leaderboard-info {
+    flex: 1;
+    margin: 0 1rem;
+}
+
+.leaderboard-score {
+    font-weight: 600;
+    font-size: 1.1rem;
+    color: #2c3e50;
+}
+
+.leaderboard-difficulty {
+    font-size: 0.85rem;
+    color: #7f8c8d;
+    margin-top: 0.2rem;
+}
+
+.leaderboard-date {
+    font-size: 0.8rem;
+    color: #95a5a6;
+    text-align: right;
+}
+
+/* 统计数据样式 */
+.stats-list {
+    max-width: 400px;
+    margin: 1.5rem auto;
+    text-align: left;
+}
+
+.stats-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem;
+    margin: 0.8rem 0;
+    background: #f8f9fa;
+    border-radius: 4px;
+    border-left: 4px solid #3498db;
+}
+
+.stats-label {
+    font-size: 1rem;
+    color: #2c3e50;
+    font-weight: 500;
+}
+
+.stats-value {
+    font-size: 1.3rem;
+    font-weight: 600;
+    color: #3498db;
+}
+
+.stats-empty {
+    text-align: center;
+    color: #7f8c8d;
+    padding: 2rem;
+    font-size: 1rem;
 }
 
 /* 移动端提示 */

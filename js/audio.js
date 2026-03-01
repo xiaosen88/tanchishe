@@ -3,6 +3,9 @@ export class AudioManager {
         this.muted = false;
         this.sounds = {};
         this.audioContext = null;
+        this.bgmOscillator = null;
+        this.bgmGain = null;
+        this.bgmPlaying = false;
         this.initAudioContext();
     }
 
@@ -11,6 +14,38 @@ export class AudioManager {
             this.audioContext = new (window.AudioContext || window.webkitAudioContext)();
         } catch (e) {
             console.warn('Web Audio API not supported');
+        }
+    }
+
+    // 播放背景音乐
+    playBGM() {
+        if (this.muted || !this.audioContext || this.bgmPlaying) return;
+
+        const ctx = this.audioContext;
+        
+        // 创建振荡器和增益节点
+        this.bgmOscillator = ctx.createOscillator();
+        this.bgmGain = ctx.createGain();
+        
+        this.bgmOscillator.connect(this.bgmGain);
+        this.bgmGain.connect(ctx.destination);
+        
+        // 设置简单的旋律（使用低音量）
+        this.bgmOscillator.type = 'sine';
+        this.bgmOscillator.frequency.value = 220; // A3音
+        this.bgmGain.gain.value = 0.05; // 很低的音量
+        
+        this.bgmOscillator.start();
+        this.bgmPlaying = true;
+    }
+
+    // 停止背景音乐
+    stopBGM() {
+        if (this.bgmOscillator && this.bgmPlaying) {
+            this.bgmOscillator.stop();
+            this.bgmOscillator = null;
+            this.bgmGain = null;
+            this.bgmPlaying = false;
         }
     }
 
@@ -62,6 +97,11 @@ export class AudioManager {
 
     toggleMute() {
         this.muted = !this.muted;
+        if (this.muted) {
+            this.stopBGM();
+        } else {
+            this.playBGM();
+        }
         return this.muted;
     }
 

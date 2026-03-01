@@ -9,7 +9,7 @@
 <body>
     <div class="container">
         <!-- 游戏标题 -->
-        <h1 class="game-title">CYBER SNAKE</h1>
+        <h1 class="game-title">贪吃蛇</h1>
 
         <!-- Canvas 游戏区域 -->
         <div class="game-wrapper">
@@ -39,6 +39,8 @@
                 <button class="menu-btn" data-difficulty="EASY">简单</button>
                 <button class="menu-btn" data-difficulty="NORMAL">普通</button>
                 <button class="menu-btn" data-difficulty="HARD">困难</button>
+                <button class="menu-btn secondary" id="showStatsBtn">查看统计</button>
+                <button class="menu-btn secondary" id="showLeaderboardBtn">排行榜</button>
             </div>
         </div>
 
@@ -53,11 +55,29 @@
         <!-- 游戏结束界面 -->
         <div id="gameOverMenu" class="menu-overlay" style="display: none;">
             <div class="menu-content">
-                <h2 class="menu-title game-over-title">GAME OVER</h2>
+                <h2 class="menu-title game-over-title">游戏结束</h2>
                 <p class="final-score">得分: <span id="finalScore">0</span></p>
                 <p class="final-high-score">最高分: <span id="finalHighScore">0</span></p>
                 <button class="menu-btn" id="restartBtn">重新开始</button>
                 <button class="menu-btn secondary" id="menuBtn">返回菜单</button>
+            </div>
+        </div>
+
+        <!-- 排行榜界面 -->
+        <div id="leaderboardMenu" class="menu-overlay" style="display: none;">
+            <div class="menu-content">
+                <h2 class="menu-title">排行榜 TOP 10</h2>
+                <div id="leaderboardList" class="leaderboard-list"></div>
+                <button class="menu-btn secondary" id="closeLeaderboardBtn">返回</button>
+            </div>
+        </div>
+
+        <!-- 统计数据界面 -->
+        <div id="statsMenu" class="menu-overlay" style="display: none;">
+            <div class="menu-content">
+                <h2 class="menu-title">游戏统计</h2>
+                <div id="statsList" class="stats-list"></div>
+                <button class="menu-btn secondary" id="closeStatsBtn">返回</button>
             </div>
         </div>
 
